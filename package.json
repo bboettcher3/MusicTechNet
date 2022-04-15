@@ -1,0 +1,17 @@
+{
+  "name": "musictechnet",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "brady boettcher",
+  "license": "ISC",
+  "dependencies": {
+    "http-server": "latest",
+    "body-parser": "latest",
+    "openssl": "^1.1.0",
+    "request": "latest"
+  }
+}
