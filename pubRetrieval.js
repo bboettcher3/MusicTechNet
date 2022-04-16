@@ -1,10 +1,10 @@
 const axios = require('axios');
 
 class Lab {
-  constructor(name, query) {
-    this.name = name;
-    this.query = query;
-  }
+    constructor(name, query) {
+        this.name = name;
+        this.query = query;
+    }
 }
 
 let IDMIL = new Lab("Digital Instruments", "query.author=marcelo&query.author=wanderley");
@@ -19,27 +19,29 @@ const cursorSuffix = "&cursor=";
 
 
 async function getAllPapers() {
-  try {
-    let res = await axios({
-      url: baseQuery + IDMIL.query + cursorSuffix + "*",
-      method: 'get',
-      timeout: 8000,
-      headers: {
-          'Content-Type': 'application/json',
-      }
-    })
-    if(res.status == 200){
-      // test for status you want, etc
-      console.log(res.status)
-    }    
-    // Don't forget to return something   
-    return res.data.message;
-  }
-  catch (err) {
-    console.error(err);
-  }
+    let pubs = { "labPubs": [] };
+    for (let i = 0; i < labs.length; i++) {
+        try {
+            let res = await axios({
+                url: baseQuery + labs[i].query + cursorSuffix + "*",
+                method: 'get',
+                timeout: 8000,
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            if (res.status != 200) {
+                // test for status you want, etc
+                console.log(res.status);
+            }
+            pubs.labPubs.push(res.data.message.items);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+    return pubs;
 }
 
 module.exports = {
-  getAllPapers
+    getAllPapers
 }
