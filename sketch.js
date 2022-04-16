@@ -45,23 +45,22 @@ function draw() {
 
   x += windowWidth * .33;
 
-  // Filters
+  // Filter bg
   fill(200);
   let filterWidth = windowWidth * .667 - 2 * PADDING;
   rect(x, y, windowWidth * .667 - 2 * PADDING, TITLE_HEIGHT, PADDING);
 
-  x += 2 * PADDING;
-
+  // Filter buttons
   for (let i = 0; i < labs.length; i++) {
-    labs[i].button.size(0.8 * filterWidth / labs.length, TITLE_HEIGHT);
+    labs[i].button.size(0.98 * filterWidth / labs.length, TITLE_HEIGHT - 1);
     labs[i].button.position(x, y);
     if (labs[i].isEnabled) {
       labs[i].button.style("background-color", labs[i].color);
     } else {
-      labs[i].button.style("background-color", "white");
-      labs[i].button.style("border", "2px solid" + labs[i].color);
+      labs[i].button.style("background-color", "gray");
+      labs[i].button.style("border", "4px solid" + labs[i].color);
     }
-    x += filterWidth / labs.length;
+    x += filterWidth / labs.length + 0.9;
   }
 
   x = PADDING;
