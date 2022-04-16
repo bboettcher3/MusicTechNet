@@ -1,3 +1,10 @@
+//var socket = io.connect('http://localhost'); // connect to server
+const socket = io();
+
+socket.on("connect", () => {
+  console.log(socket.id);
+});
+
 const PADDING = 10;
 const TITLE_HEIGHT = 50;
 
@@ -58,7 +65,7 @@ function draw() {
       labs[i].button.style("background-color", labs[i].color);
     } else {
       labs[i].button.style("background-color", "gray");
-      labs[i].button.style("border", "4px solid" + labs[i].color);
+      labs[i].button.style("border", "2px solid" + labs[i].color);
     }
     x += filterWidth / labs.length + 0.9;
   }
@@ -79,4 +86,7 @@ function draw() {
 
 function labClicked(lab) {
   lab.isEnabled = !lab.isEnabled;
+  if (lab.isEnabled) {
+    pubRetrieval.getAllPapers();
+  }
 }

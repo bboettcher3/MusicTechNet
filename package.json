@@ -9,9 +9,10 @@
   "author": "brady boettcher",
   "license": "ISC",
   "dependencies": {
-    "http-server": "latest",
-    "body-parser": "latest",
-    "openssl": "^1.1.0",
-    "request": "latest"
+    "axios": "latest",
+    "crossref": "^1.2.1",
+    "express": "latest",
+    "path": "latest",
+    "socket.io": "latest"
   }
 }
