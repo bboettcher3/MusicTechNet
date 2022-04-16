@@ -1,5 +1,6 @@
 const express = require('express');
 var path = require('path');
+const pubRetrieval = require('./pubRetrieval.js');
 
 const app = express();
 
@@ -11,11 +12,14 @@ var server = require('http').createServer(app);
 
 const io = require('socket.io')(server);
 io.sockets.on('connection', function (socket) {
-  socket.emit('news', { hello: 'world' }); // Send data to client
+  pubRetrieval.getAllPapers().then(res => socket.emit('pubs', res));
+  //console.log(pubs);
+  //socket.emit('pubs', pubs); // Send pubs to client on connection
 
-  // wait for the event raised by the client
-  socket.on('my other event', function (data) {  
-    console.log(data);
+  // Get subsets of the pubs if requested
+  // data argument should include indices of the labs to get
+  socket.on('getPubs', function (data) {  
+    console.log("Okay bish damn hold on..");
   });
 });
 

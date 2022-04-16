@@ -2,8 +2,11 @@
 const socket = io();
 
 socket.on("connect", () => {
-  console.log(socket.id);
+  //socket.emit('getPubs', { });
 });
+socket.on("pubs", (pubs) => {
+  console.log(pubs);
+})
 
 const PADDING = 10;
 const TITLE_HEIGHT = 50;
