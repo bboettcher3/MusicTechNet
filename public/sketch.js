@@ -85,6 +85,11 @@ function draw() {
     //Visualizations
     fill(100);
     rect(x, y, windowWidth * .667 - 2 * PADDING, windowHeight - TITLE_HEIGHT - 3 * PADDING, PADDING);
+    let iFrame = document.getElementById('authorFrame');
+    iFrame.width = windowWidth * .667 - 2 * PADDING;
+    iFrame.height = windowHeight - TITLE_HEIGHT - 3 * PADDING;
+    iFrame.style.top = y + "px";
+    iFrame.style.left = x + "px";
 }
 
 function labClicked(lab) {

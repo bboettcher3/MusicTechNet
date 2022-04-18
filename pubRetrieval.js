@@ -35,13 +35,6 @@ class Link {
     }
 }
 
-let VOSNetwork = {
-    "network": {
-        "items": [],
-        "links": []
-    }
-};
-
 let IDMIL = new Lab("Digital Instruments", "Marcelo", "Wanderley", "query.author=marcelo&query.author=wanderley");
 let DDMAL = new Lab("Music Information Retrieval", "Ichiro", "Fujinaga", "query.author=ichiro&query.author=fujinaga");
 let CAML = new Lab("Acoustic Modeling", "Gary", "Scavone", "query.author=gary&query.author=scavone");
@@ -60,10 +53,15 @@ let publications = []; // Array of pub items from Crossref
 async function getAllPapers() {
     publications = [];
     authorList = [];
-    VOSNetwork = {
+    let VOSNetwork = {
         "network": {
             "items": [],
             "links": []
+        },
+        "config": {
+            "parameters": {
+                "dark_ui": true
+            }
         }
     };
     for (let i = 0; i < labs.length; i++) {
