@@ -4,7 +4,11 @@ const pubRetrieval = require('./pubRetrieval.js');
 
 const app = express();
 
-app.use(express.static(path.join(__dirname, 'public')))
+app.use(express.static(path.join(__dirname, 'public')));
+app.get('/network', function(req, res){
+  const file = `${__dirname}/networks/testJson.json`;
+  res.download(file); // Set disposition and send it.
+});
 
 var port = 8080;
 app.set('port', port);
