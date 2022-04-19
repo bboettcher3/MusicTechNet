@@ -2,27 +2,30 @@ const axios = require('axios');
 const fs = require('fs');
 
 class Lab {
-    constructor(name, firstName, lastName, query) {
+    constructor(name, firstName, lastName, query, color) {
         this.name = name;
         this.firstName = firstName;
         this.lastName = lastName;
         this.query = query;
+        this.color = color;
     }
 }
 
 class Author {
-    constructor(id, name) {
+    constructor(id, name, cluster) {
         this.id = id;
         this.name = name;
+        this.cluster = cluster;
         this.links = [];
     }
 }
 
 // Formatted according to VOSviewer "item" JSON
 class Item {
-    constructor(id, label) {
+    constructor(id, label, cluster) {
         this.id = id;
         this.label = label;
+        this.cluster = cluster;
     }
 }
 
@@ -56,10 +59,28 @@ async function getAllPapers() {
     let VOSNetwork = {
         "network": {
             "items": [],
-            "links": []
+            "links": [],
+            "clusters": [
+                {"cluster": 1, "label": labs[0].name},
+                {"cluster": 2, "label": labs[1].name},
+                {"cluster": 3, "label": labs[2].name},
+                {"cluster": 4, "label": labs[3].name},
+                {"cluster": 5, "label": labs[4].name}
+            ]
         },
         "config": {
+            "color_schemes": {
+                "cluster_colors": [
+                    {"cluster": 1, "color": "#19CC80"},
+                    {"cluster": 2, "color": "#8019CC"},
+                    {"cluster": 3, "color": "#CC8019"},
+                    {"cluster": 4, "color": "#4157D8"},
+                    {"cluster": 5, "color": "#CC1965"}
+                ]
+            },
             "parameters": {
+                "attraction": 7,
+                "repulsion": 3,
                 "dark_ui": true
             }
         }
@@ -87,7 +108,7 @@ async function getAllPapers() {
                 cursor = res.data.message["next-cursor"];
 
                 var newItems = res.data.message.items;
-                newItems = cleanData(newItems);
+                newItems = cleanData(newItems, i);
 
                 publications = publications.concat(newItems);
             } catch (err) {
@@ -107,11 +128,11 @@ async function getAllPapers() {
 }
 
 // Checks for lab head names and corrects any inconsistencies
-function cleanData(items) {
+function cleanData(items, labIdx) {
     var matchedData = [];
     // Per publication
     for (let i = 0; i < items.length; i++) {
-        var matched = checkAddAuthors(items[i].author);
+        var matched = checkAddAuthors(items[i].author, labIdx);
         if (matched) { 
             matchedData.push(items[i]);
         }
@@ -119,8 +140,9 @@ function cleanData(items) {
     return matchedData;
 }
 
-function checkAddAuthors(authors) {
+function checkAddAuthors(authors, labIdx) {
     var matched = false;
+    var cluster = labIdx + 1;
     // Check if lab heads are in author list
     for (let i = 0; i < authors.length; i++) {
         for (let j = 0; j < labs.length; j++) {
@@ -128,6 +150,7 @@ function checkAddAuthors(authors) {
                 authors[i].family.includes(labs[j].lastName)) {
                 authors[i].given = labs[j].firstName;
                 authors[i].family = labs[j].lastName;
+                cluster = j + 1;
                 matched = true;
             }
         }
@@ -147,7 +170,7 @@ function checkAddAuthors(authors) {
                 }
             }
             if (!authorExists) {
-                var newAuthor = new Author(authorList.length, fullName);
+                var newAuthor = new Author(authorList.length, fullName, cluster);
                 authorList.push(newAuthor);
                 authorIds.push(newAuthor.id);
             }
@@ -183,7 +206,7 @@ function createItemJson() {
     var itemList = [];
     for (let i = 0; i < authorList.length; i++) {
         // Push, adding 1 to id for VOS network
-        itemList.push(new Item(authorList[i].id + 1, authorList[i].name));
+        itemList.push(new Item(authorList[i].id + 1, authorList[i].name, authorList[i].cluster));
     }
     return itemList;
 }
