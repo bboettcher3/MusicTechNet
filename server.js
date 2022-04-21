@@ -1,5 +1,6 @@
 const express = require('express');
 var path = require('path');
+const cron = require('node-cron');
 const pubRetrieval = require('./pubRetrieval.js');
 
 const app = express();
@@ -25,6 +26,12 @@ io.sockets.on('connection', function(socket) {
     socket.on('getPubs', function(data) {
         console.log("Okay bish damn hold on..");
     });
+});
+
+// Schedule update pubs task to be run on the server once a day.
+cron.schedule('0 0 * * *', function() {
+  console.log('Updating pubs');
+  pubRetrieval.getAllPapers();
 });
 
 /**

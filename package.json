@@ -12,6 +12,7 @@
     "axios": "latest",
     "crossref": "^1.2.1",
     "express": "latest",
+    "node-cron": "^3.0.0",
     "path": "latest",
     "socket.io": "latest"
   }
