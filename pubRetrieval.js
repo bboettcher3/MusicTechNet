@@ -46,7 +46,7 @@ let MPCL = new Lab("Music Perception", "Stephen", "McAdams", "query.author=steph
 let labs = [IDMIL, DDMAL, CAML, SPCL, MPCL];
 
 const baseQuery = "https://api.crossref.org/works?";
-const cursorSuffix = "&cursor=";
+const cursorSuffix = "&mailto=bradyboettcher@gmail.com&cursor=";
 const MAX_FOUND = 100;
 const MAX_CURSORS = 10;
 
@@ -85,6 +85,7 @@ let VOSNetworkEmpty = {
 };
 
 async function getAllPapers() {
+    console.log("Querying CrossRef for publications")
     publications = [];
     authorList = [];
     labHeadIds = new Array(labs.length);
@@ -239,7 +240,6 @@ function createVOSJsons() {
             }
         }
 
-        if (i == 0) console.log(labLinks);
         // For each lab link combination, add an author item and matching links to the respective network
         var combos = binaryCombos(labs.length);
         for (let j = 0; j < combos.length; j++) {
@@ -264,17 +264,17 @@ function createVOSJsons() {
                     networkIdx |= (1 << k);
                 }
             }
-            if (i == 0) console.log(networkIdx);
+            networkIdx--; // Convert to index
             // Add author to network
             var newAuthor = new Item(authorList[i].id, authorList[i].name, authorList[i].cluster);
-            labCombinationNetworks[networkIdx - 1].network.items.push(newAuthor);
+            labCombinationNetworks[networkIdx].network.items.push(newAuthor);
             // Add links that are relevant to this network
             for (let l = 0; l < authorList[i].links.length; l++) {
                 // Check if link is connected to any active labs
                 for (let m = 0; m < combos[j].length; m++) {
-                    // Only add link if lab is active
-                    if (combos[j][m] && isAuthorLinkedToLab(authorList[i].links[l].target_id, labHeadIds[labLinks[m]])) {
-                        labCombinationNetworks[networkIdx - 1].network.links.push(authorList[i].links[l]);
+                    // Only add link if lab is active and link target is also linked
+                    if (combos[j][m] && isAuthorLinkedToLab(authorList[i].links[l].target_id, labHeadIds[m])) {
+                        labCombinationNetworks[networkIdx].network.links.push(authorList[i].links[l]);
                         break;
                     }
                 }

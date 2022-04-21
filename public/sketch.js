@@ -5,7 +5,7 @@ socket.on("connect", () => {
     //socket.emit('getPubs', { });
 });
 socket.on("pubs", (pubs) => {
-    console.log(pubs);
+    //console.log(pubs);
 })
 
 const PADDING = 10;
@@ -27,9 +27,38 @@ let MPCL = new Lab("Music Perception", "#CC1965");
 let labs = [IDMIL, DDMAL, CAML, SPCL, MPCL];
 const VOSviewerUrl = "https://app.vosviewer.com/?json=https://drive.google.com/uc?id=";
 const TempNetworkUrls = [
-"149zKhjcQMsKL1D97q7rhu-BOW5tUf70O", "16Gxfe0GLqVJxw-q3gLRqEbwaxccvX4PK", "17R7gLDUX5JyK621YvC7j8ite-I0WVa20", "18oixqted_v6UM4CliiM-aWW0Q7kEvBcs", "1B_S9djiSJREyGrqc3c5Xq0HqzRnGo5A3", "1I30X8zCbqkAPJzDWuSgHRVZxbJpLl358", "1Lav9IlKeRz4yiFPV72Jfb38tqNHG9ybn", "1NsWU1wbvdpVNHhHQTobQ1Ej5AsPZpKJc", "1PeVXdZ2EZ1iGgfc_QfLVjbVsA1u_hhGe", "1Q7gs-QgpmFfvRY8JTMaW-WTOVjASWYtn", "1Q8nGRQm0syg6-yQDHyUSInG82pYOeO90", "1UaN8exoYSTIzTj4GyFEbBcWgJirAV4hr", "1VBxAjlMHw7fKdj3xynmz6akKAP9KKhqX", "1VoiF1QfnOkShnLrOyBVRKfhNnnx5KUUQ", "1W-AQ4M6xdJ1K0veHX5ixKtyG3BY3kPHn", "1_ppRDOHKHRWoaKRw1B13KKh6dK7-YhRM", "1_yhL7sJRuiit9u6iA86_I_lG_y-CFumh", "1b47AmgB021gkOP5L_MBLCrO1R1TRdJ1V", "1bXubw9NMcD-vVRg8YZAPcjIOb2BAMU9p", "1iVnaJFkH7oDhYDnrdKw8iH2Hl5Leexg8", "1ihklAG0vvm12x6uHEMuLAS2tQRxe7D79", "1jJbZGd7NuCxWnLuvBTS_z1NDOtpF52Rq", "1k8iffbuoOZcsmyLoqIhVBh63cDZdd3nC", "1m_Mg2U_HKGIQSZxPx7CBdptlCvdNGlZX", "1mgaJvggdhlh8ydGSHEsF18QKtML06Pm7", "1oKbzAdIgy3g0yyxt_eJnMGIojn-momzc", "1qbJ773FjTFZy-6qzV8e9lkjufjLBCyYm", "1vGWn1wdCu8ic0lMmZ5RZT72PQFc2GPOO", "1wS5GluLKSUfmeF2mUOtWKYJdcjgB0Y1N", "1xBctkJ0vbtz1BgcBfRnexyspy5RRM5e3", "1zMiUZty2LNuvL0xlvcUCiL64T4w-yz3B"
+    "16Gxfe0GLqVJxw-q3gLRqEbwaxccvX4PK", //0
+    "1UaN8exoYSTIzTj4GyFEbBcWgJirAV4hr",
+    "1NsWU1wbvdpVNHhHQTobQ1Ej5AsPZpKJc",
+    "1bXubw9NMcD-vVRg8YZAPcjIOb2BAMU9p",
+    "1I30X8zCbqkAPJzDWuSgHRVZxbJpLl358",
+    "1Q8nGRQm0syg6-yQDHyUSInG82pYOeO90", //5
+    "1zMiUZty2LNuvL0xlvcUCiL64T4w-yz3B",
+    "1ihklAG0vvm12x6uHEMuLAS2tQRxe7D79",
+    "1Lav9IlKeRz4yiFPV72Jfb38tqNHG9ybn",
+    "1k8iffbuoOZcsmyLoqIhVBh63cDZdd3nC",
+    "1W-AQ4M6xdJ1K0veHX5ixKtyG3BY3kPHn", //10
+    "1mgaJvggdhlh8ydGSHEsF18QKtML06Pm7",
+    "1VBxAjlMHw7fKdj3xynmz6akKAP9KKhqX",
+    "1B_S9djiSJREyGrqc3c5Xq0HqzRnGo5A3",
+    "1b47AmgB021gkOP5L_MBLCrO1R1TRdJ1V",
+    "1xBctkJ0vbtz1BgcBfRnexyspy5RRM5e3", //15
+    "149zKhjcQMsKL1D97q7rhu-BOW5tUf70O",
+    "1iVnaJFkH7oDhYDnrdKw8iH2Hl5Leexg8",
+    "1Q7gs-QgpmFfvRY8JTMaW-WTOVjASWYtn",
+    "1_yhL7sJRuiit9u6iA86_I_lG_y-CFumh",
+    "1PeVXdZ2EZ1iGgfc_QfLVjbVsA1u_hhGe", //20
+    "1m_Mg2U_HKGIQSZxPx7CBdptlCvdNGlZX",
+    "1jJbZGd7NuCxWnLuvBTS_z1NDOtpF52Rq",
+    "17R7gLDUX5JyK621YvC7j8ite-I0WVa20",
+    "1qbJ773FjTFZy-6qzV8e9lkjufjLBCyYm",
+    "18oixqted_v6UM4CliiM-aWW0Q7kEvBcs", //25
+    "1oKbzAdIgy3g0yyxt_eJnMGIojn-momzc",
+    "1VoiF1QfnOkShnLrOyBVRKfhNnnx5KUUQ",
+    "1_ppRDOHKHRWoaKRw1B13KKh6dK7-YhRM",
+    "1vGWn1wdCu8ic0lMmZ5RZT72PQFc2GPOO",
+    "1wS5GluLKSUfmeF2mUOtWKYJdcjgB0Y1N", //30
 ];
-
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
@@ -111,6 +140,6 @@ function labClicked(lab) {
     // Change iframe src to update visualization
     let iFrame = document.getElementById('authorFrame');
     iFrame.src = VOSviewerUrl + TempNetworkUrls[networkIdx - 1];
-    console.log("network: " + networkIdx + ", URL: " + iFrame.src);
+    console.log("network: " + (networkIdx - 1) + ", URL: " + iFrame.src);
     redraw();
 }
