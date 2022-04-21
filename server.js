@@ -17,14 +17,15 @@ var server = require('http').createServer(app);
 
 const io = require('socket.io')(server);
 io.sockets.on('connection', function(socket) {
-    //pubRetrieval.getAllPapers().then(res => socket.emit('pubs', res));
+    pubRetrieval.getAllPapers().then(res => socket.emit('pubs', res));
     //console.log(pubs);
     //socket.emit('pubs', pubs); // Send pubs to client on connection
 
     // Get subsets of the pubs if requested
     // data argument should include indices of the labs to get
-    socket.on('getPubs', function(data) {
-        console.log("Okay bish damn hold on..");
+    socket.on('getPubs', function(networkIdx) {
+        var pubs = pubRetrieval.getPubs(networkIdx);
+        socket.emit('pubs', pubs);
     });
 });
 

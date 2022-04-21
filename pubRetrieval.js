@@ -78,11 +78,17 @@ let VOSNetworkEmpty = {
         },
         "parameters": {
             "attraction": 7,
-            "repulsion": 3,
+            "repulsion": 1,
             "dark_ui": true
         }
     }
 };
+
+function getPubs(networkIdx) {
+    // Parse pubs json
+    fs.writeFileSync("./MTPublications.json", pubData);
+
+}
 
 async function getAllPapers() {
     console.log("Querying CrossRef for publications")
@@ -136,6 +142,8 @@ async function getAllPapers() {
         let data = JSON.stringify(labCombinationNetworks[i]);
         fs.writeFileSync("MTNetwork_" + i + ".json", data);
     }
+    let pubData = JSON.stringify(publications);
+    fs.writeFileSync("MTPublications.json", pubData);
     console.log("Papers written!");
     return publications;
 }

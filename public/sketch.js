@@ -137,9 +137,13 @@ function labClicked(lab) {
           networkIdx |= (1 << i);
         }
     }
+    // Decrement to convert to index
+    networkIdx--;
     // Change iframe src to update visualization
     let iFrame = document.getElementById('authorFrame');
-    iFrame.src = VOSviewerUrl + TempNetworkUrls[networkIdx - 1];
-    console.log("network: " + (networkIdx - 1) + ", URL: " + iFrame.src);
+    iFrame.src = VOSviewerUrl + TempNetworkUrls[networkIdx];
+    console.log("network: " + networkIdx + ", URL: " + iFrame.src);
+    // Update pub list
+    socket.emit('getPubs', networkIdx);
     redraw();
 }
