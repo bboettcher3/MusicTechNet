@@ -2,10 +2,11 @@
 const socket = io();
 
 socket.on("connect", () => {
-    //socket.emit('getPubs', { });
+    socket.emit('getPubs', 30); // On load, get all pubs
 });
 socket.on("pubs", (pubs) => {
-    //console.log(pubs);
+    filteredPublications = pubs;
+    redraw();
 })
 
 const PADDING = 10;
@@ -25,6 +26,8 @@ let CAML = new Lab("Acoustic Modeling", "#CC8019");
 let SPCL = new Lab("Sound Processing", "#4157D8");
 let MPCL = new Lab("Music Perception", "#CC1965");
 let labs = [IDMIL, DDMAL, CAML, SPCL, MPCL];
+let filteredPublications = [];
+const NUM_PUBS_LISTED = 10;
 const VOSviewerUrl = "https://app.vosviewer.com/?json=https://drive.google.com/uc?id=";
 const TempNetworkUrls = [
     "16Gxfe0GLqVJxw-q3gLRqEbwaxccvX4PK", //0
@@ -116,6 +119,25 @@ function draw() {
     // Lists
     fill(150);
     rect(x, y, windowWidth * .33 - PADDING, windowHeight - TITLE_HEIGHT - 3 * PADDING, PADDING);
+    let pubHeight = (windowHeight - TITLE_HEIGHT - 3 * PADDING) / NUM_PUBS_LISTED;
+    textSize(14);
+    textAlign(LEFT);
+    
+    let curPubY = y + PADDING;
+    // Make button for each listed pub
+    for (let i = 0; i < NUM_PUBS_LISTED; i++) {
+        if (i > filteredPublications.length || curPubY > windowHeight - TITLE_HEIGHT - 3 * PADDING) break;
+        // White outline rect
+        fill(200);
+        rect(x, curPubY, windowWidth * .33 - 2 * PADDING, pubHeight, PADDING);
+        // Covered by gray rect to just leave border
+        fill(150);
+        rect(x + 3, curPubY + 3, windowWidth * .33 - 2 * PADDING - 6, pubHeight - 6, PADDING);
+        // Pub title and info text
+        fill(0);
+        text(filteredPublications[i].title, x + PADDING, curPubY + PADDING, windowWidth * .33 - 3 * PADDING, pubHeight);
+        curPubY += pubHeight + PADDING / 2;
+    }
 
     x += windowWidth * .33;
 
@@ -137,13 +159,13 @@ function labClicked(lab) {
           networkIdx |= (1 << i);
         }
     }
+    // Update pub list
+    socket.emit('getPubs', networkIdx);
     // Decrement to convert to index
     networkIdx--;
     // Change iframe src to update visualization
     let iFrame = document.getElementById('authorFrame');
     iFrame.src = VOSviewerUrl + TempNetworkUrls[networkIdx];
     console.log("network: " + networkIdx + ", URL: " + iFrame.src);
-    // Update pub list
-    socket.emit('getPubs', networkIdx);
     redraw();
 }

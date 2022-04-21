@@ -86,8 +86,34 @@ let VOSNetworkEmpty = {
 
 function getPubs(networkIdx) {
     // Parse pubs json
-    fs.writeFileSync("./MTPublications.json", pubData);
+    let pubs = JSON.parse(fs.readFileSync("./data/MTPublications.json"));
+    // Make list of lab heads that are present in network
+    let relevantAuthorIds = [];
+    for (let i = 0; i < labs.length; i++) {
+        if ((networkIdx & (1 << i)) != 0) {
+            relevantAuthorIds.push(pubs.labHeadIds[i]);
+        }
+    }    
 
+    // Filter publications using networkIdx bits
+    var filteredPubs = [];
+    for (let i = 0; i < pubs.publications.length; i++) {
+        let isPresent = false; // If pub is present in current filtered list
+        for (let j = 0; j < relevantAuthorIds.length; j++) {
+            for (let k = 0; k < pubs.publications[i].mtIDs.length; k++) {
+                if (relevantAuthorIds[j] == pubs.publications[i].mtIDs[k]) {
+                    isPresent = true;
+                    break;
+                }
+            }
+            if (isPresent) break;
+        }
+        if (isPresent) {
+            // Add pub to filtered list
+            filteredPubs.push(pubs.publications[i]);
+        }
+    }
+    return filteredPubs;
 }
 
 async function getAllPapers() {
@@ -140,10 +166,11 @@ async function getAllPapers() {
     createVOSJsons();
     for (let i = 0; i < labCombinationNetworks.length; i++) {
         let data = JSON.stringify(labCombinationNetworks[i]);
-        fs.writeFileSync("MTNetwork_" + i + ".json", data);
+        fs.writeFileSync("./data/MTNetwork_" + i + ".json", data);
     }
-    let pubData = JSON.stringify(publications);
-    fs.writeFileSync("MTPublications.json", pubData);
+    let pubJson = {"labHeadIds": labHeadIds, "publications": publications};
+    let pubData = JSON.stringify(pubJson);
+    fs.writeFileSync("./data/MTPublications.json", pubData);
     console.log("Papers written!");
     return publications;
 }
@@ -330,5 +357,6 @@ function isAuthorLinkedToLab(authorId, labHeadId) {
 }
 
 module.exports = {
-    getAllPapers
+    getAllPapers,
+    getPubs
 }
