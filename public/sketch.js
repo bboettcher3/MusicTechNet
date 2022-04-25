@@ -29,8 +29,8 @@ let MPCL = new Lab("Music Perception", "#CC1965");
 let labs = [IDMIL, DDMAL, CAML, SPCL, MPCL];
 let filteredPublications = []; // List of filtered publications (unsorted)
 let publicationButtons = []; // Dynamic list of buttons to open publications
-let authorSearch;
-let authorSearchValue = "";
+let searchBar;
+let searchValue = "";
 const NUM_PUBS_LISTED = 9;
 const VOSviewerUrl = "https://app.vosviewer.com/?json=https://drive.google.com/uc?id=";
 const TempNetworkUrls = [
@@ -72,6 +72,8 @@ function setup() {
 
     for (let i = 0; i < labs.length; i++) {
         labs[i].button = createButton(labs[i].name);
+        labs[i].button.style("border", "2px solid" + labs[i].color);
+        labs[i].button.style("font-weight", "bold");
     }
     IDMIL.button.mouseClicked(function() { labClicked(IDMIL); });
     DDMAL.button.mouseClicked(function() { labClicked(DDMAL); });
@@ -79,9 +81,9 @@ function setup() {
     SPCL.button.mouseClicked(function() { labClicked(SPCL); });
     MPCL.button.mouseClicked(function() { labClicked(MPCL); });
 
-    authorSearch = createInput();
-    authorSearch.style("placeholder", "search for an author...");
-    authorSearch.input(onAuthorSearch);
+    searchBar = createInput();
+    searchBar.style("placeholder", "search for an author...");
+    searchBar.input(onSearch);
     makePubButtons();
 }
 
@@ -115,9 +117,10 @@ function draw() {
         labs[i].button.position(x, y);
         if (labs[i].isEnabled) {
             labs[i].button.style("background-color", labs[i].color);
+            labs[i].button.style("font-weight", "bold");
         } else {
             labs[i].button.style("background-color", "gray");
-            labs[i].button.style("border", "2px solid" + labs[i].color);
+            labs[i].button.style("font-weight", "normal");
         }
         x += filterWidth / labs.length + 0.9;
     }
@@ -129,14 +132,14 @@ function draw() {
     // Bg rect
     fill(150);
     rect(x, y, windowWidth * .33 - PADDING, windowHeight - TITLE_HEIGHT - 3 * PADDING, PADDING);
-    // Author search bar
+    // Search bar
     y += PADDING / 2;
     fill(0);
     textAlign(LEFT, CENTER);
     textSize(14);
-    text("Author Search:", x + 2 * PADDING, y, windowWidth * .33 / 2.0, 20);
-    authorSearch.size(windowWidth * .33 / 1.5);
-    authorSearch.position(x + windowWidth * .33 / 4.0, y);
+    text("Search:", x + 2 * PADDING, y, windowWidth * .33 / 2.0, 20);
+    searchBar.size(windowWidth * .33 / 1.5);
+    searchBar.position(x + windowWidth * .33 / 4.0, y);
 
     line(x, y + 25, x + windowWidth * .33 - PADDING, y + 25);
 
@@ -170,12 +173,10 @@ function draw() {
     x += windowWidth * .33;
 
     //Visualizations
-    fill(100);
-    rect(x, y, windowWidth * .667 - 2 * PADDING, windowHeight - TITLE_HEIGHT - 3 * PADDING, PADDING);
     let iFrame = document.getElementById('authorFrame');
     iFrame.width = windowWidth * .667 - 2 * PADDING;
     iFrame.height = windowHeight - TITLE_HEIGHT - 3 * PADDING;
-    iFrame.style.top = y + "px";
+    iFrame.style.top = y - 20 + "px";
     iFrame.style.left = x + "px";
 }
 
@@ -198,20 +199,19 @@ function labClicked(lab) {
     redraw();
 }
 
-function onAuthorSearch() {
-    authorSearchValue = this.value();
+function onSearch() {
+    searchValue = this.value();
     makePubButtons();
     redraw();
 }
 
 function makePubButtons() {
     publicationButtons = [];
-    if (authorSearchValue == "") {
+    if (searchValue == "") {
         // Sort eventually, but not for now
         for (let i = 0; i < NUM_PUBS_LISTED; i++) {
             if (filteredPublications.length < i) break;
-            var pubString = filteredPublications[i].title[0] + "<br>" + filteredPublications[i].author[0].family;
-            publicationButtons.push(createButton(pubString));
+            publicationButtons.push(makePubButton(filteredPublications[i]));
         }
     } else {
         var pubRatings = [];
@@ -219,20 +219,34 @@ function makePubButtons() {
         for (let i = 0; i < filteredPublications.length; i++) {
             var fields = [];
             for (let j = 0; j < filteredPublications[i].author.length; j++) {
-                fields.push(filteredPublications[i].author[j].given + " " + filteredPublications[i].author[j].family);
+                fields.push(filteredPublications[i].author[j].given.toLowerCase() + " " + filteredPublications[i].author[j].family.toLowerCase());
             }
-            fields.push(filteredPublications[i].title[0]);
-            var pubSim = stringSimilarity.findBestMatch(authorSearchValue, fields);
+            fields.push(filteredPublications[i].title[0].toLowerCase());
+            var pubSim = stringSimilarity.findBestMatch(searchValue.toLowerCase(), fields);
             pubRatings.push({ "pubIdx": i, "rating": pubSim.bestMatch.rating });
         }
         pubRatings.sort((a, b) => (a.rating < b.rating) ? 1 : -1);
 
-        //console.log(filteredPublications[pubRatings[0].pubIdx].title);
         for (let i = 0; i < NUM_PUBS_LISTED; i++) {
-          var pubIdx = pubRatings[i].pubIdx;
+            var pubIdx = pubRatings[i].pubIdx;
             if (filteredPublications.length < pubIdx) break;
-            var pubString = filteredPublications[pubIdx].title[0] + "<br>" + filteredPublications[pubIdx].author[0].family;
-            publicationButtons.push(createButton(pubString));
+            publicationButtons.push(makePubButton(filteredPublications[pubIdx]));
         }
     }
+}
+
+function makePubButton(pub) {
+    var pubString = pub.title[0] + "<br>";
+    for (let i = 0; i < pub.author.length; i++) {
+        pubString += pub.author[i].family;
+        if (i < pub.author.length - 1) {
+            pubString += ", ";
+        }
+    }
+    pubString +=  " (" + pub.published["date-parts"][0][0] + ")"; // published year
+    let pubButton = createButton(pubString);
+    pubButton.mousePressed(function() {
+        window.open(pub.URL);
+    });
+    return pubButton;
 }
