@@ -6,6 +6,7 @@ socket.on("connect", () => {
 });
 socket.on("pubs", (pubs) => {
     filteredPublications = pubs;
+    makePubButtons();
     redraw();
 })
 
@@ -26,7 +27,10 @@ let CAML = new Lab("Acoustic Modeling", "#CC8019");
 let SPCL = new Lab("Sound Processing", "#4157D8");
 let MPCL = new Lab("Music Perception", "#CC1965");
 let labs = [IDMIL, DDMAL, CAML, SPCL, MPCL];
-let filteredPublications = [];
+let filteredPublications = []; // List of filtered publications (unsorted)
+let publicationButtons = []; // Dynamic list of buttons to open publications
+let authorSearch;
+let authorSearchValue = "";
 const NUM_PUBS_LISTED = 10;
 const VOSviewerUrl = "https://app.vosviewer.com/?json=https://drive.google.com/uc?id=";
 const TempNetworkUrls = [
@@ -74,6 +78,10 @@ function setup() {
     CAML.button.mouseClicked(function() { labClicked(CAML); });
     SPCL.button.mouseClicked(function() { labClicked(SPCL); });
     MPCL.button.mouseClicked(function() { labClicked(MPCL); });
+
+    authorSearch = createInput();
+    authorSearch.style("placeholder", "search for an author...");
+    authorSearch.input(onAuthorSearch);
 }
 
 function windowResized() {
@@ -117,25 +125,41 @@ function draw() {
     y += TITLE_HEIGHT + PADDING;
 
     // Lists
+    // Bg rect
     fill(150);
     rect(x, y, windowWidth * .33 - PADDING, windowHeight - TITLE_HEIGHT - 3 * PADDING, PADDING);
-    let pubHeight = (windowHeight - TITLE_HEIGHT - 3 * PADDING) / NUM_PUBS_LISTED;
+    // Author search bar
+    y += PADDING / 2;
+    fill(0);
+    textAlign(LEFT, CENTER);
     textSize(14);
-    textAlign(LEFT);
+    text("Author Search:", x + 2 * PADDING, y, windowWidth * .33 / 2.0, 20);
+    authorSearch.size(windowWidth * .33  / 1.5);
+    authorSearch.position(x + windowWidth * .33 / 4.0, y);
+
+    line(x, y + 25, x + windowWidth * .33 - PADDING, y + 25);
+
+    y += 20;
+
+    let pubHeight = (windowHeight - TITLE_HEIGHT - 3 * PADDING) / NUM_PUBS_LISTED;
+    textSize(13);
+    textAlign(LEFT, CENTER);
     
+    let pubX = x + PADDING / 2;
     let curPubY = y + PADDING;
     // Make button for each listed pub
     for (let i = 0; i < NUM_PUBS_LISTED; i++) {
         if (i > filteredPublications.length || curPubY > windowHeight - TITLE_HEIGHT - 3 * PADDING) break;
         // White outline rect
         fill(200);
-        rect(x, curPubY, windowWidth * .33 - 2 * PADDING, pubHeight, PADDING);
+        rect(pubX, curPubY, windowWidth * .33 - 2 * PADDING, pubHeight, PADDING);
         // Covered by gray rect to just leave border
         fill(150);
-        rect(x + 3, curPubY + 3, windowWidth * .33 - 2 * PADDING - 6, pubHeight - 6, PADDING);
+        rect(pubX + 3, curPubY + 3, windowWidth * .33 - 2 * PADDING - 6, pubHeight - 6, PADDING);
         // Pub title and info text
         fill(0);
-        text(filteredPublications[i].title, x + PADDING, curPubY + PADDING, windowWidth * .33 - 3 * PADDING, pubHeight);
+        text(filteredPublications[i].title, pubX + PADDING, curPubY + PADDING, windowWidth * .33 - 3 * PADDING, pubHeight / 3);
+        text(filteredPublications[i].author[0].family, pubX + PADDING, curPubY + PADDING + pubHeight / 2, windowWidth * .33 - 3 * PADDING, pubHeight / 3);
         curPubY += pubHeight + PADDING / 2;
     }
 
@@ -168,4 +192,28 @@ function labClicked(lab) {
     iFrame.src = VOSviewerUrl + TempNetworkUrls[networkIdx];
     console.log("network: " + networkIdx + ", URL: " + iFrame.src);
     redraw();
+}
+
+function onAuthorSearch() {
+  authorSearchValue = this.value();
+  makePubButtons();
+  redraw();
+}
+
+function makePubButtons() {
+    if (authorSearchValue == "") {
+        // Sort eventually, but not for now
+
+    } else {
+        // Sort filtered pubs according to author relevance
+        for (let i = 0; i < filteredPublications.length; i++) {
+          var authors = [];
+          for (let j = 0; j < filteredPublications[i].author.length; j++) {
+              authors.push(filteredPublications[i].author[j].given + " " + filteredPublications[i].author[j].family);
+          }
+          var fields = [filteredPublications[i].title];
+          fields = fields.concat(authors);
+          var pubSim = stringSimilarity.findBestMatch(authorSearchValue, fields);
+        }
+    }
 }
