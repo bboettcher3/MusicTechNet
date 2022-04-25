@@ -31,7 +31,7 @@ let filteredPublications = []; // List of filtered publications (unsorted)
 let publicationButtons = []; // Dynamic list of buttons to open publications
 let authorSearch;
 let authorSearchValue = "";
-const NUM_PUBS_LISTED = 10;
+const NUM_PUBS_LISTED = 9;
 const VOSviewerUrl = "https://app.vosviewer.com/?json=https://drive.google.com/uc?id=";
 const TempNetworkUrls = [
     "16Gxfe0GLqVJxw-q3gLRqEbwaxccvX4PK", //0
@@ -82,6 +82,7 @@ function setup() {
     authorSearch = createInput();
     authorSearch.style("placeholder", "search for an author...");
     authorSearch.input(onAuthorSearch);
+    makePubButtons();
 }
 
 function windowResized() {
@@ -134,32 +135,35 @@ function draw() {
     textAlign(LEFT, CENTER);
     textSize(14);
     text("Author Search:", x + 2 * PADDING, y, windowWidth * .33 / 2.0, 20);
-    authorSearch.size(windowWidth * .33  / 1.5);
+    authorSearch.size(windowWidth * .33 / 1.5);
     authorSearch.position(x + windowWidth * .33 / 4.0, y);
 
     line(x, y + 25, x + windowWidth * .33 - PADDING, y + 25);
 
     y += 20;
 
-    let pubHeight = (windowHeight - TITLE_HEIGHT - 3 * PADDING) / NUM_PUBS_LISTED;
+    let pubHeight = (windowHeight - y - 3 * PADDING) / NUM_PUBS_LISTED;
     textSize(13);
     textAlign(LEFT, CENTER);
-    
+
     let pubX = x + PADDING / 2;
     let curPubY = y + PADDING;
     // Make button for each listed pub
-    for (let i = 0; i < NUM_PUBS_LISTED; i++) {
-        if (i > filteredPublications.length || curPubY > windowHeight - TITLE_HEIGHT - 3 * PADDING) break;
+    for (let i = 0; i < publicationButtons.length; i++) {
+        if (curPubY > windowHeight - TITLE_HEIGHT - 3 * PADDING) break;
+        publicationButtons[i].size(windowWidth * .33 - 2 * PADDING, pubHeight);
+        publicationButtons[i].position(pubX, curPubY);
         // White outline rect
-        fill(200);
+        /*fill(200);
         rect(pubX, curPubY, windowWidth * .33 - 2 * PADDING, pubHeight, PADDING);
         // Covered by gray rect to just leave border
         fill(150);
         rect(pubX + 3, curPubY + 3, windowWidth * .33 - 2 * PADDING - 6, pubHeight - 6, PADDING);
         // Pub title and info text
         fill(0);
-        text(filteredPublications[i].title, pubX + PADDING, curPubY + PADDING, windowWidth * .33 - 3 * PADDING, pubHeight / 3);
+        text(filteredPublications[i].title[0], pubX + PADDING, curPubY + PADDING, windowWidth * .33 - 3 * PADDING, pubHeight / 3);
         text(filteredPublications[i].author[0].family, pubX + PADDING, curPubY + PADDING + pubHeight / 2, windowWidth * .33 - 3 * PADDING, pubHeight / 3);
+        */
         curPubY += pubHeight + PADDING / 2;
     }
 
@@ -180,7 +184,7 @@ function labClicked(lab) {
     var networkIdx = 0;
     for (let i = 0; i < labs.length; i++) {
         if (labs[i].isEnabled) {
-          networkIdx |= (1 << i);
+            networkIdx |= (1 << i);
         }
     }
     // Update pub list
@@ -195,25 +199,40 @@ function labClicked(lab) {
 }
 
 function onAuthorSearch() {
-  authorSearchValue = this.value();
-  makePubButtons();
-  redraw();
+    authorSearchValue = this.value();
+    makePubButtons();
+    redraw();
 }
 
 function makePubButtons() {
+    publicationButtons = [];
     if (authorSearchValue == "") {
         // Sort eventually, but not for now
-
+        for (let i = 0; i < NUM_PUBS_LISTED; i++) {
+            if (filteredPublications.length < i) break;
+            var pubString = filteredPublications[i].title[0] + "<br>" + filteredPublications[i].author[0].family;
+            publicationButtons.push(createButton(pubString));
+        }
     } else {
+        var pubRatings = [];
         // Sort filtered pubs according to author relevance
         for (let i = 0; i < filteredPublications.length; i++) {
-          var authors = [];
-          for (let j = 0; j < filteredPublications[i].author.length; j++) {
-              authors.push(filteredPublications[i].author[j].given + " " + filteredPublications[i].author[j].family);
-          }
-          var fields = [filteredPublications[i].title];
-          fields = fields.concat(authors);
-          var pubSim = stringSimilarity.findBestMatch(authorSearchValue, fields);
+            var fields = [];
+            for (let j = 0; j < filteredPublications[i].author.length; j++) {
+                fields.push(filteredPublications[i].author[j].given + " " + filteredPublications[i].author[j].family);
+            }
+            fields.push(filteredPublications[i].title[0]);
+            var pubSim = stringSimilarity.findBestMatch(authorSearchValue, fields);
+            pubRatings.push({ "pubIdx": i, "rating": pubSim.bestMatch.rating });
+        }
+        pubRatings.sort((a, b) => (a.rating < b.rating) ? 1 : -1);
+
+        //console.log(filteredPublications[pubRatings[0].pubIdx].title);
+        for (let i = 0; i < NUM_PUBS_LISTED; i++) {
+          var pubIdx = pubRatings[i].pubIdx;
+            if (filteredPublications.length < pubIdx) break;
+            var pubString = filteredPublications[pubIdx].title[0] + "<br>" + filteredPublications[pubIdx].author[0].family;
+            publicationButtons.push(createButton(pubString));
         }
     }
 }
