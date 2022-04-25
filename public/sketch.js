@@ -31,7 +31,9 @@ let filteredPublications = []; // List of filtered publications (unsorted)
 let publicationButtons = []; // Dynamic list of buttons to open publications
 let searchBar;
 let searchValue = "";
-const NUM_PUBS_LISTED = 9;
+let pageLeft, pageRight; // Paging buttons
+let curPage = 0;
+const NUM_PUBS_LISTED = 8;
 const VOSviewerUrl = "https://app.vosviewer.com/?json=https://drive.google.com/uc?id=";
 const TempNetworkUrls = [
     "16Gxfe0GLqVJxw-q3gLRqEbwaxccvX4PK", //0
@@ -84,6 +86,19 @@ function setup() {
     searchBar = createInput();
     searchBar.style("placeholder", "search for an author...");
     searchBar.input(onSearch);
+
+    pageLeft = createButton("&#8592;");
+    pageLeft.mouseClicked(function() {
+        if (curPage > 0) curPage--;
+        makePubButtons();
+    });
+    pageRight = createButton("&#8594;");
+    pageRight.mouseClicked(function() {
+        var numPages = filteredPublications.length / NUM_PUBS_LISTED;
+        if (curPage < numPages - 1) curPage++;
+        makePubButtons();
+    });
+
     makePubButtons();
 }
 
@@ -131,7 +146,7 @@ function draw() {
     // Lists
     // Bg rect
     fill(150);
-    rect(x, y, windowWidth * .33 - PADDING, windowHeight - TITLE_HEIGHT - 3 * PADDING, PADDING);
+    rect(x, y, windowWidth * .33 - PADDING, windowHeight - TITLE_HEIGHT - 3 * PADDING);
     // Search bar
     y += PADDING / 2;
     fill(0);
@@ -145,38 +160,39 @@ function draw() {
 
     y += 20;
 
+    // Make button for each listed pub
     let pubHeight = (windowHeight - y - 3 * PADDING) / NUM_PUBS_LISTED;
     textSize(13);
     textAlign(LEFT, CENTER);
-
     let pubX = x + PADDING / 2;
     let curPubY = y + PADDING;
-    // Make button for each listed pub
     for (let i = 0; i < publicationButtons.length; i++) {
         if (curPubY > windowHeight - TITLE_HEIGHT - 3 * PADDING) break;
         publicationButtons[i].size(windowWidth * .33 - 2 * PADDING, pubHeight);
         publicationButtons[i].position(pubX, curPubY);
-        // White outline rect
-        /*fill(200);
-        rect(pubX, curPubY, windowWidth * .33 - 2 * PADDING, pubHeight, PADDING);
-        // Covered by gray rect to just leave border
-        fill(150);
-        rect(pubX + 3, curPubY + 3, windowWidth * .33 - 2 * PADDING - 6, pubHeight - 6, PADDING);
-        // Pub title and info text
-        fill(0);
-        text(filteredPublications[i].title[0], pubX + PADDING, curPubY + PADDING, windowWidth * .33 - 3 * PADDING, pubHeight / 3);
-        text(filteredPublications[i].author[0].family, pubX + PADDING, curPubY + PADDING + pubHeight / 2, windowWidth * .33 - 3 * PADDING, pubHeight / 3);
-        */
         curPubY += pubHeight + PADDING / 2;
     }
+
+    // Paging buttons
+    let pagingCenter = pubX + (windowWidth * .33 - 2 * PADDING) / 2.0;
+    let pageY = windowHeight - 5 * PADDING;
+    pageLeft.size(50, 30);
+    pageRight.size(50, 30);
+    pageLeft.position(pagingCenter - 100, pageY);
+    pageRight.position(pagingCenter + 50, pageY);
+    textAlign(CENTER, CENTER);
+    textSize(14);
+    let numPages = Math.floor(filteredPublications.length / NUM_PUBS_LISTED);
+    text("page " + (curPage + 1) + "/" + numPages, pagingCenter - 40, pageY, 80, 30);
 
     x += windowWidth * .33;
 
     //Visualizations
+    let vizY = y - 20 - PADDING / 2;
     let iFrame = document.getElementById('authorFrame');
     iFrame.width = windowWidth * .667 - 2 * PADDING;
     iFrame.height = windowHeight - TITLE_HEIGHT - 3 * PADDING;
-    iFrame.style.top = y - 20 + "px";
+    iFrame.style.top = vizY + "px";
     iFrame.style.left = x + "px";
 }
 
@@ -188,6 +204,7 @@ function labClicked(lab) {
             networkIdx |= (1 << i);
         }
     }
+    if (networkIdx == 0) return;
     // Update pub list
     socket.emit('getPubs', networkIdx);
     // Decrement to convert to index
@@ -200,16 +217,17 @@ function labClicked(lab) {
 }
 
 function onSearch() {
+    curPage = 0;
     searchValue = this.value();
     makePubButtons();
-    redraw();
 }
 
 function makePubButtons() {
     publicationButtons = [];
+    var startIdx = curPage * NUM_PUBS_LISTED;
     if (searchValue == "") {
         // Sort eventually, but not for now
-        for (let i = 0; i < NUM_PUBS_LISTED; i++) {
+        for (let i = startIdx; i < startIdx + NUM_PUBS_LISTED; i++) {
             if (filteredPublications.length < i) break;
             publicationButtons.push(makePubButton(filteredPublications[i]));
         }
@@ -227,12 +245,13 @@ function makePubButtons() {
         }
         pubRatings.sort((a, b) => (a.rating < b.rating) ? 1 : -1);
 
-        for (let i = 0; i < NUM_PUBS_LISTED; i++) {
+        for (let i = startIdx; i < startIdx + NUM_PUBS_LISTED; i++) {
             var pubIdx = pubRatings[i].pubIdx;
             if (filteredPublications.length < pubIdx) break;
             publicationButtons.push(makePubButton(filteredPublications[pubIdx]));
         }
     }
+    redraw();
 }
 
 function makePubButton(pub) {
