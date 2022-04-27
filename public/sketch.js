@@ -54,7 +54,7 @@ let searchValue = "";
 let pageLeft, pageRight; // Paging buttons
 let curPage = 0;
 const NUM_PUBS_LISTED = 8;
-const VOSviewerUrl = "https://app.vosviewer.com/?json=https://drive.google.com/uc?id=";
+const VOSviewerUrl = "https://app.vosviewer.com/?json=https://musictechnet.simssa.ca/network?idx=";
 const TempNetworkUrls = [
     "16Gxfe0GLqVJxw-q3gLRqEbwaxccvX4PK", //0
     "1UaN8exoYSTIzTj4GyFEbBcWgJirAV4hr",
@@ -243,7 +243,7 @@ function labClicked(lab) {
     networkIdx--;
     // Change iframe src to update visualization
     let iFrame = document.getElementById('authorFrame');
-    iFrame.src = VOSviewerUrl + TempNetworkUrls[networkIdx];
+    iFrame.src = VOSviewerUrl + networkIdx;
     console.log("network:: " + networkIdx + ", URL: " + iFrame.src);
     redraw();
 }

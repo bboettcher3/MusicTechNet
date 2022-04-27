@@ -6,8 +6,8 @@ const pubRetrieval = require('./pubRetrieval.js');
 const app = express();
 
 app.use(express.static(path.join(__dirname, 'public')));
-app.get('/network', function(req, res){
-  const file = `${__dirname}/networks/testJson.json`;
+app.get('/network', function(req, res) {
+  const file = __dirname + "/data/MTNetwork_" + req.query.idx + ".json";
   res.download(file); // Set disposition and send it.
 });
 
@@ -18,7 +18,6 @@ var server = require('http').createServer(app);
 const io = require('socket.io')(server);
 io.sockets.on('connection', function(socket) {
     //pubRetrieval.getAllPapers().then(res => socket.emit('pubs', res));
-    console.log("socket connected");
     //socket.emit('pubs', pubs); // Send pubs to client on connection
 
     // Get subsets of the pubs if requested
