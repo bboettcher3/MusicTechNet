@@ -18,7 +18,7 @@ var server = require('http').createServer(app);
 const io = require('socket.io')(server);
 io.sockets.on('connection', function(socket) {
     //pubRetrieval.getAllPapers().then(res => socket.emit('pubs', res));
-    //console.log(pubs);
+    console.log("socket connected");
     //socket.emit('pubs', pubs); // Send pubs to client on connection
 
     // Get subsets of the pubs if requested

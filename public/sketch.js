@@ -14,21 +14,41 @@ const PADDING = 10;
 const TITLE_HEIGHT = 50;
 
 class Lab {
-    constructor(name, color) {
+    constructor(name, firstName, lastName, color) {
         this.name = name;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.color = color;
         this.isEnabled = true;
     }
 }
 
-let IDMIL = new Lab("Digital Instruments", "#19CC80");
-let DDMAL = new Lab("Music Information Retrieval", "#8019CC");
-let CAML = new Lab("Acoustic Modeling", "#CC8019");
-let SPCL = new Lab("Sound Processing", "#4157D8");
-let MPCL = new Lab("Music Perception", "#CC1965");
+class PubButton {
+  constructor(pub) {
+    this.pub = pub;
+    var pubString = "<b>" + pub.title[0] + "</b><br>";
+    for (let i = 0; i < pub.author.length; i++) {
+        pubString += pub.author[i].family;
+        if (i < pub.author.length - 1) {
+            pubString += ", ";
+        }
+    }
+    pubString +=  " (" + pub.published["date-parts"][0][0] + ")"; // published year
+    this.button = createButton(pubString);
+    this.button.mousePressed(function() {
+        window.open(pub.URL);
+    });
+  }
+}
+
+let IDMIL = new Lab("Digital Instruments", "Marcelo", "Wanderley", "#19CC80");
+let DDMAL = new Lab("Music Information Retrieval", "Ichiro", "Fujinaga", "#8019CC");
+let CAML = new Lab("Acoustic Modeling", "Gary", "Scavone", "#CC8019");
+let SPCL = new Lab("Sound Processing", "Philippe", "Depalle", "#4157D8");
+let MPCL = new Lab("Music Perception", "Steven", "McAdams", "#CC1965");
 let labs = [IDMIL, DDMAL, CAML, SPCL, MPCL];
 let filteredPublications = []; // List of filtered publications (unsorted)
-let publicationButtons = []; // Dynamic list of buttons to open publications
+let publicationButtons = []; // Dynamic list of PubButton objects to open publications
 let searchBar;
 let searchValue = "";
 let pageLeft, pageRight; // Paging buttons
@@ -164,12 +184,22 @@ function draw() {
     let pubHeight = (windowHeight - y - 3 * PADDING) / NUM_PUBS_LISTED;
     textSize(13);
     textAlign(LEFT, CENTER);
-    let pubX = x + PADDING / 2;
+    let pubX = x + PADDING;
     let curPubY = y + PADDING;
     for (let i = 0; i < publicationButtons.length; i++) {
         if (curPubY > windowHeight - TITLE_HEIGHT - 3 * PADDING) break;
-        publicationButtons[i].size(windowWidth * .33 - 2 * PADDING, pubHeight);
-        publicationButtons[i].position(pubX, curPubY);
+        // Pub lab colors
+        var pubLabs = getPubLabs(publicationButtons[i].pub);
+        var colorHeight = pubHeight / pubLabs.length;
+        var curColorY = curPubY;
+        for (let j = 0; j < pubLabs.length; j++) {
+            fill(pubLabs[j].color);
+            rect(x, curColorY, PADDING, colorHeight);
+            curColorY += colorHeight;
+        }
+        // Pub button
+        publicationButtons[i].button.size(windowWidth * .33 - 2 * PADDING - 1, pubHeight);
+        publicationButtons[i].button.position(pubX, curPubY);
         curPubY += pubHeight + PADDING / 2;
     }
 
@@ -182,6 +212,7 @@ function draw() {
     pageRight.position(pagingCenter + 50, pageY);
     textAlign(CENTER, CENTER);
     textSize(14);
+    fill(0);
     let numPages = Math.floor(filteredPublications.length / NUM_PUBS_LISTED);
     text("page " + (curPage + 1) + "/" + numPages, pagingCenter - 40, pageY, 80, 30);
 
@@ -205,6 +236,7 @@ function labClicked(lab) {
         }
     }
     if (networkIdx == 0) return;
+    curPage = 0;
     // Update pub list
     socket.emit('getPubs', networkIdx);
     // Decrement to convert to index
@@ -212,7 +244,7 @@ function labClicked(lab) {
     // Change iframe src to update visualization
     let iFrame = document.getElementById('authorFrame');
     iFrame.src = VOSviewerUrl + TempNetworkUrls[networkIdx];
-    console.log("network: " + networkIdx + ", URL: " + iFrame.src);
+    console.log("network:: " + networkIdx + ", URL: " + iFrame.src);
     redraw();
 }
 
@@ -223,13 +255,15 @@ function onSearch() {
 }
 
 function makePubButtons() {
-    publicationButtons = [];
+    while (publicationButtons.length) {
+        publicationButtons.pop();
+    }
     var startIdx = curPage * NUM_PUBS_LISTED;
     if (searchValue == "") {
         // Sort eventually, but not for now
         for (let i = startIdx; i < startIdx + NUM_PUBS_LISTED; i++) {
             if (filteredPublications.length < i) break;
-            publicationButtons.push(makePubButton(filteredPublications[i]));
+            publicationButtons.push(new PubButton(filteredPublications[i]));
         }
     } else {
         var pubRatings = [];
@@ -248,24 +282,22 @@ function makePubButtons() {
         for (let i = startIdx; i < startIdx + NUM_PUBS_LISTED; i++) {
             var pubIdx = pubRatings[i].pubIdx;
             if (filteredPublications.length < pubIdx) break;
-            publicationButtons.push(makePubButton(filteredPublications[pubIdx]));
+            publicationButtons.push(new PubButton(filteredPublications[pubIdx]));
         }
     }
     redraw();
 }
 
-function makePubButton(pub) {
-    var pubString = pub.title[0] + "<br>";
-    for (let i = 0; i < pub.author.length; i++) {
-        pubString += pub.author[i].family;
-        if (i < pub.author.length - 1) {
-            pubString += ", ";
+function getPubLabs(pub) {
+    var pubLabs = [];
+    for (let i = 0; i < labs.length; i++) {
+        for (let j = 0; j < pub.author.length; j++) {
+            if (pub.author[j].given == labs[i].firstName &&
+                pub.author[j].family == labs[i].lastName) {
+                // Found author, add to labs list
+                pubLabs.push(labs[i]);
+            }
         }
     }
-    pubString +=  " (" + pub.published["date-parts"][0][0] + ")"; // published year
-    let pubButton = createButton(pubString);
-    pubButton.mousePressed(function() {
-        window.open(pub.URL);
-    });
-    return pubButton;
+    return pubLabs;
 }
