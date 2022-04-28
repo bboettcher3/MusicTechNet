@@ -49,45 +49,14 @@ let MPCL = new Lab("Music Perception", "Stephen", "McAdams", "#CC1965");
 let labs = [IDMIL, DDMAL, CAML, SPCL, MPCL];
 let filteredPublications = []; // List of filtered publications (unsorted)
 let publicationButtons = []; // List of PubButton objects to open publications
-let searchBar;
+let githubLink; // Link element to github repo
+let githubLinkImg; // Img element for github link
+let searchBar; // Search bar element
 let searchValue = "";
 let pageLeft, pageRight; // Paging buttons
 let curPage = 0;
 const NUM_PUBS_LISTED = 8;
 const VOSviewerUrl = "https://app.vosviewer.com/?json=http://musictechnet.simssa.ca/network?idx=";
-const TempNetworkUrls = [
-    "16Gxfe0GLqVJxw-q3gLRqEbwaxccvX4PK", //0
-    "1UaN8exoYSTIzTj4GyFEbBcWgJirAV4hr",
-    "1NsWU1wbvdpVNHhHQTobQ1Ej5AsPZpKJc",
-    "1bXubw9NMcD-vVRg8YZAPcjIOb2BAMU9p",
-    "1I30X8zCbqkAPJzDWuSgHRVZxbJpLl358",
-    "1Q8nGRQm0syg6-yQDHyUSInG82pYOeO90", //5
-    "1zMiUZty2LNuvL0xlvcUCiL64T4w-yz3B",
-    "1ihklAG0vvm12x6uHEMuLAS2tQRxe7D79",
-    "1Lav9IlKeRz4yiFPV72Jfb38tqNHG9ybn",
-    "1k8iffbuoOZcsmyLoqIhVBh63cDZdd3nC",
-    "1W-AQ4M6xdJ1K0veHX5ixKtyG3BY3kPHn", //10
-    "1mgaJvggdhlh8ydGSHEsF18QKtML06Pm7",
-    "1VBxAjlMHw7fKdj3xynmz6akKAP9KKhqX",
-    "1B_S9djiSJREyGrqc3c5Xq0HqzRnGo5A3",
-    "1b47AmgB021gkOP5L_MBLCrO1R1TRdJ1V",
-    "1xBctkJ0vbtz1BgcBfRnexyspy5RRM5e3", //15
-    "149zKhjcQMsKL1D97q7rhu-BOW5tUf70O",
-    "1iVnaJFkH7oDhYDnrdKw8iH2Hl5Leexg8",
-    "1Q7gs-QgpmFfvRY8JTMaW-WTOVjASWYtn",
-    "1_yhL7sJRuiit9u6iA86_I_lG_y-CFumh",
-    "1PeVXdZ2EZ1iGgfc_QfLVjbVsA1u_hhGe", //20
-    "1m_Mg2U_HKGIQSZxPx7CBdptlCvdNGlZX",
-    "1jJbZGd7NuCxWnLuvBTS_z1NDOtpF52Rq",
-    "17R7gLDUX5JyK621YvC7j8ite-I0WVa20",
-    "1qbJ773FjTFZy-6qzV8e9lkjufjLBCyYm",
-    "18oixqted_v6UM4CliiM-aWW0Q7kEvBcs", //25
-    "1oKbzAdIgy3g0yyxt_eJnMGIojn-momzc",
-    "1VoiF1QfnOkShnLrOyBVRKfhNnnx5KUUQ",
-    "1_ppRDOHKHRWoaKRw1B13KKh6dK7-YhRM",
-    "1vGWn1wdCu8ic0lMmZ5RZT72PQFc2GPOO",
-    "1wS5GluLKSUfmeF2mUOtWKYJdcjgB0Y1N", //30
-];
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
@@ -102,6 +71,11 @@ function setup() {
     CAML.button.mouseClicked(function() { labClicked(CAML); });
     SPCL.button.mouseClicked(function() { labClicked(SPCL); });
     MPCL.button.mouseClicked(function() { labClicked(MPCL); });
+
+    // Github link
+    githubLink = createA("https://github.com/bboettcher3/MusicTechNet", "","_top");
+    githubLinkImg = createImg("GitHub-Mark-Light-32px.png", "Github").parent(githubLink);
+    githubLinkImg.size(32, 32);
 
     searchBar = createInput();
     searchBar.style("placeholder", "search for an author...");
@@ -135,11 +109,16 @@ function draw() {
 
     // Title
     textSize(38);
-    textAlign(CENTER);
+    textAlign(CENTER, CENTER);
     fill(255);
-    text('Welcome to MusicTechNet!', x, y + PADDING, windowWidth * .33 - PADDING, TITLE_HEIGHT);
+    text('MusicTechNet', x, y, windowWidth * .33 - PADDING, TITLE_HEIGHT);
+
+
 
     x += windowWidth * .33;
+
+    // Github link
+    githubLinkImg.position(x - githubLinkImg.width - PADDING, y + PADDING);
 
     // Filter bg
     fill(200);
