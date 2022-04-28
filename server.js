@@ -7,7 +7,7 @@ const app = express();
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/network', function(req, res) {
-  const file = __dirname + "/public/data/MTNetwork_" + req.query.idx + ".json";
+  const file = __dirname + "/data/MTNetwork_" + req.query.idx + ".json";
   res.download(file); // Set disposition and send it.
 });
 
