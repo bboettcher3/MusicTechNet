@@ -15,7 +15,7 @@ var port = 8080;
 app.set('port', port);
 var server = require('http').createServer(app);
 
-const io = require('socket.io')(server);
+const io = require('socket.io', { transports: ['websocket', 'polling'] })(server);
 io.sockets.on('connection', function(socket) {
     //pubRetrieval.getAllPapers().then(res => socket.emit('pubs', res));
     //socket.emit('pubs', pubs); // Send pubs to client on connection

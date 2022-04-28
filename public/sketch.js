@@ -1,5 +1,5 @@
 //var socket = io.connect('http://localhost'); // connect to server
-const socket = io();
+const socket = io('http://localhost:8080', { transports: ['websocket', 'polling'] });
 
 socket.on("connect", () => {
     socket.emit('getPubs', 30); // On load, get all pubs
