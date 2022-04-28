@@ -108,12 +108,10 @@ function draw() {
     let y = PADDING;
 
     // Title
-    textSize(38);
+    textSize(34);
     textAlign(CENTER, CENTER);
     fill(255);
-    text('MusicTechNet', x, y, windowWidth * .33 - PADDING, TITLE_HEIGHT);
-
-
+    text('Music Technology Networks', x, y, windowWidth * .33 - PADDING - githubLinkImg.width, TITLE_HEIGHT);
 
     x += windowWidth * .33;
 
@@ -240,7 +238,12 @@ function makePubButtons() {
     }
     var startIdx = curPage * NUM_PUBS_LISTED;
     if (searchValue == "") {
-        // Sort eventually, but not for now
+        // Sort by number of labs (~interdisciplinararity~)
+        for (let i = 0; i < filteredPublications.length; i++) {
+            filteredPublications[i].numLabs = getPubLabs(filteredPublications[i]).length;
+        }
+        filteredPublications.sort((a, b) => (a.numLabs < b.numLabs) ? 1 : -1);
+        // Make buttons for the top NUM_PUBS_LISTED pubs
         for (let i = startIdx; i < startIdx + NUM_PUBS_LISTED; i++) {
             if (filteredPublications.length < i) break;
             publicationButtons.push(new PubButton(filteredPublications[i]));
