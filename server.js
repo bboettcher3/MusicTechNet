@@ -7,26 +7,13 @@ const app = express();
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/network', function(req, res) {
-  const file = __dirname + "/data/MTNetwork_" + req.query.idx + ".json";
+  const file = __dirname + "/public/data/MTNetwork_" + req.query.idx + ".json";
   res.download(file); // Set disposition and send it.
 });
 
 var port = 8080;
 app.set('port', port);
 var server = require('http').createServer(app);
-
-const io = require('socket.io', { transports: ['websocket', 'polling'] })(server);
-io.sockets.on('connection', function(socket) {
-    //pubRetrieval.getAllPapers().then(res => socket.emit('pubs', res));
-    //socket.emit('pubs', pubs); // Send pubs to client on connection
-
-    // Get subsets of the pubs if requested
-    // data argument should include indices of the labs to get
-    socket.on('getPubs', function(networkIdx) {
-        var pubs = pubRetrieval.getPubs(networkIdx);
-        socket.emit('pubs', pubs);
-    });
-});
 
 // Schedule update pubs task to be run on the server once a day.
 cron.schedule('0 0 * * *', function() {

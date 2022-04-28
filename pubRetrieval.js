@@ -84,38 +84,6 @@ let VOSNetworkEmpty = {
     }
 };
 
-function getPubs(networkIdx) {
-    // Parse pubs json
-    let pubs = JSON.parse(fs.readFileSync("./data/MTPublications.json"));
-    // Make list of lab heads that are present in network
-    let relevantAuthorIds = [];
-    for (let i = 0; i < labs.length; i++) {
-        if ((networkIdx & (1 << i)) != 0) {
-            relevantAuthorIds.push(pubs.labHeadIds[i]);
-        }
-    }    
-
-    // Filter publications using networkIdx bits
-    var filteredPubs = [];
-    for (let i = 0; i < pubs.publications.length; i++) {
-        let isPresent = false; // If pub is present in current filtered list
-        for (let j = 0; j < relevantAuthorIds.length; j++) {
-            for (let k = 0; k < pubs.publications[i].mtIDs.length; k++) {
-                if (relevantAuthorIds[j] == pubs.publications[i].mtIDs[k]) {
-                    isPresent = true;
-                    break;
-                }
-            }
-            if (isPresent) break;
-        }
-        if (isPresent) {
-            // Add pub to filtered list
-            filteredPubs.push(pubs.publications[i]);
-        }
-    }
-    return filteredPubs;
-}
-
 async function getAllPapers() {
     console.log("Querying CrossRef for publications")
     publications = [];
@@ -170,7 +138,7 @@ async function getAllPapers() {
     }
     let pubJson = {"labHeadIds": labHeadIds, "publications": publications};
     let pubData = JSON.stringify(pubJson);
-    fs.writeFileSync("./data/MTPublications.json", pubData);
+    fs.writeFileSync("./public/MTPublications.json", pubData);
     console.log("Papers written!");
     return publications;
 }
@@ -357,6 +325,5 @@ function isAuthorLinkedToLab(authorId, labHeadId) {
 }
 
 module.exports = {
-    getAllPapers,
-    getPubs
+    getAllPapers
 }

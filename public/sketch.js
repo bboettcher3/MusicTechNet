@@ -1,15 +1,3 @@
-//var socket = io.connect('http://localhost'); // connect to server
-const socket = io('http://localhost:8080', { transports: ['websocket', 'polling'] });
-
-socket.on("connect", () => {
-    socket.emit('getPubs', 30); // On load, get all pubs
-});
-socket.on("pubs", (pubs) => {
-    filteredPublications = pubs;
-    makePubButtons();
-    redraw();
-})
-
 const PADDING = 10;
 const TITLE_HEIGHT = 50;
 
@@ -47,6 +35,7 @@ let CAML = new Lab("Acoustic Modeling", "Gary", "Scavone", "#CC8019");
 let SPCL = new Lab("Sound Processing", "Philippe", "Depalle", "#4157D8");
 let MPCL = new Lab("Music Perception", "Stephen", "McAdams", "#CC1965");
 let labs = [IDMIL, DDMAL, CAML, SPCL, MPCL];
+let allPublications; // All publications in JSON form
 let filteredPublications = []; // List of filtered publications (unsorted)
 let publicationButtons = []; // List of PubButton objects to open publications
 let githubLink; // Link element to github repo
@@ -57,6 +46,10 @@ let pageLeft, pageRight; // Paging buttons
 let curPage = 0;
 const NUM_PUBS_LISTED = 8;
 const VOSviewerUrl = "https://app.vosviewer.com/?json=http://musictechnet.simssa.ca/network?idx=";
+
+function preload() {
+  allPublications = loadJSON("MTPublications.json");
+}
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
@@ -92,6 +85,8 @@ function setup() {
         if (curPage < numPages - 1) curPage++;
         makePubButtons();
     });
+
+    filteredPublications = getPubs(30);
 
     makePubButtons();
 }
@@ -215,13 +210,14 @@ function labClicked(lab) {
     if (networkIdx == 0) return;
     curPage = 0;
     // Update pub list
-    socket.emit('getPubs', networkIdx);
+    filteredPublications = getPubs(networkIdx);
+    makePubButtons();
     // Decrement to convert to index
     networkIdx--;
     // Change iframe src to update visualization
     let iFrame = document.getElementById('authorFrame');
     iFrame.src = VOSviewerUrl + networkIdx;
-    console.log("network:: " + networkIdx + ", URL: " + iFrame.src);
+    console.log("network: " + networkIdx + ", URL: " + iFrame.src);
     redraw();
 }
 
@@ -283,4 +279,34 @@ function getPubLabs(pub) {
         }
     }
     return pubLabs;
+}
+
+function getPubs(networkIdx) {
+    // Make list of lab heads that are present in network
+    let relevantAuthorIds = [];
+    for (let i = 0; i < labs.length; i++) {
+        if ((networkIdx & (1 << i)) != 0) {
+            relevantAuthorIds.push(allPublications.labHeadIds[i]);
+        }
+    }    
+
+    // Filter publications using networkIdx bits
+    var filteredPubs = [];
+    for (let i = 0; i < allPublications.publications.length; i++) {
+        let isPresent = false; // If pub is present in current filtered list
+        for (let j = 0; j < relevantAuthorIds.length; j++) {
+            for (let k = 0; k < allPublications.publications[i].mtIDs.length; k++) {
+                if (relevantAuthorIds[j] == allPublications.publications[i].mtIDs[k]) {
+                    isPresent = true;
+                    break;
+                }
+            }
+            if (isPresent) break;
+        }
+        if (isPresent) {
+            // Add pub to filtered list
+            filteredPubs.push(allPublications.publications[i]);
+        }
+    }
+    return filteredPubs;
 }
