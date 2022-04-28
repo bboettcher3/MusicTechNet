@@ -33,7 +33,7 @@ class PubButton {
             pubString += ", ";
         }
     }
-    pubString +=  " (" + pub.published["date-parts"][0][0] + ")"; // published year
+    pubString +=  " (" + pub.created["date-parts"][0][0] + ")"; // published year
     this.button = createButton(pubString);
     this.button.mousePressed(function() {
         window.open(pub.URL);
@@ -45,16 +45,16 @@ let IDMIL = new Lab("Digital Instruments", "Marcelo", "Wanderley", "#19CC80");
 let DDMAL = new Lab("Music Information Retrieval", "Ichiro", "Fujinaga", "#8019CC");
 let CAML = new Lab("Acoustic Modeling", "Gary", "Scavone", "#CC8019");
 let SPCL = new Lab("Sound Processing", "Philippe", "Depalle", "#4157D8");
-let MPCL = new Lab("Music Perception", "Steven", "McAdams", "#CC1965");
+let MPCL = new Lab("Music Perception", "Stephen", "McAdams", "#CC1965");
 let labs = [IDMIL, DDMAL, CAML, SPCL, MPCL];
 let filteredPublications = []; // List of filtered publications (unsorted)
-let publicationButtons = []; // Dynamic list of PubButton objects to open publications
+let publicationButtons = []; // List of PubButton objects to open publications
 let searchBar;
 let searchValue = "";
 let pageLeft, pageRight; // Paging buttons
 let curPage = 0;
 const NUM_PUBS_LISTED = 8;
-const VOSviewerUrl = "https://app.vosviewer.com/?json=https://musictechnet.simssa.ca/network?idx=";
+const VOSviewerUrl = "https://app.vosviewer.com/?json=http://musictechnet.simssa.ca/network?idx=";
 const TempNetworkUrls = [
     "16Gxfe0GLqVJxw-q3gLRqEbwaxccvX4PK", //0
     "1UaN8exoYSTIzTj4GyFEbBcWgJirAV4hr",
@@ -256,6 +256,7 @@ function onSearch() {
 
 function makePubButtons() {
     while (publicationButtons.length) {
+        publicationButtons[publicationButtons.length - 1].button.remove();
         publicationButtons.pop();
     }
     var startIdx = curPage * NUM_PUBS_LISTED;
