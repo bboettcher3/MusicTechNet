@@ -45,7 +45,7 @@ let searchValue = "";
 let pageLeft, pageRight; // Paging buttons
 let curPage = 0;
 const NUM_PUBS_LISTED = 8;
-const VOSviewerUrl = "https://app.vosviewer.com/?json=http://musictechnet.simssa.ca/network?idx=";
+const VOSviewerUrl = "https://app.vosviewer.com/?json=https://musictechnet.simssa.ca/network?idx=";
 
 function preload() {
   allPublications = loadJSON("MTPublications.json");
@@ -156,8 +156,8 @@ function draw() {
     let pubHeight = (windowHeight - y - 3 * PADDING) / NUM_PUBS_LISTED;
     textSize(13);
     textAlign(LEFT, CENTER);
-    let pubX = x + PADDING;
     let curPubY = y + PADDING;
+    noStroke();
     for (let i = 0; i < publicationButtons.length; i++) {
         if (curPubY > windowHeight - TITLE_HEIGHT - 3 * PADDING) break;
         // Pub lab colors
@@ -166,17 +166,17 @@ function draw() {
         var curColorY = curPubY;
         for (let j = 0; j < pubLabs.length; j++) {
             fill(pubLabs[j].color);
-            rect(x, curColorY, PADDING, colorHeight);
+            rect(x + windowWidth * .33 - 2 * PADDING, curColorY, PADDING, colorHeight);
             curColorY += colorHeight;
         }
         // Pub button
         publicationButtons[i].button.size(windowWidth * .33 - 2 * PADDING - 1, pubHeight);
-        publicationButtons[i].button.position(pubX, curPubY);
+        publicationButtons[i].button.position(x, curPubY);
         curPubY += pubHeight + PADDING / 2;
     }
 
     // Paging buttons
-    let pagingCenter = pubX + (windowWidth * .33 - 2 * PADDING) / 2.0;
+    let pagingCenter = x + (windowWidth * .33 - 2 * PADDING) / 2.0;
     let pageY = windowHeight - 5 * PADDING;
     pageLeft.size(50, 30);
     pageRight.size(50, 30);
