@@ -2,13 +2,18 @@ const express = require('express');
 var path = require('path');
 const cron = require('node-cron');
 const pubRetrieval = require('./pubRetrieval.js');
+const fs = require('fs');
 
 const app = express();
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/network', function(req, res) {
-  const file = __dirname + "/data/MTNetwork_" + req.query.idx + ".json";
-  res.download(file); // Set disposition and send it.
+  const filename = __dirname + "/data/MTNetwork_" + req.query.idx + ".json";
+  var file = new File(filename);
+  if (file.exists()) {
+    let netJson = JSON.parse(fs.readFileSync(filename));
+    res.json(netJson); // Set disposition and send it.
+  }
 });
 
 var port = 8080;
@@ -58,5 +63,5 @@ function onListening() {
     var bind = typeof addr === 'string' ?
         'pipe ' + addr :
         'port ' + addr.port;
-    console.log('Listening on ' + bind);
+    //console.log('Listening on ' + bind);
 }

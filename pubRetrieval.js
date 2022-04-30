@@ -120,7 +120,18 @@ async function getAllPapers() {
                 var newItems = res.data.message.items;
                 newItems = cleanData(newItems, i);
 
-                publications = publications.concat(newItems);
+                for (let i = 0; i < newItems.length; i++) {
+                    var found = false;
+                    for (let j = 0; j < publications.length; j++) {
+                        if (newItems[i].title == publications[j].title) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        publications.push(newItems[i]);
+                    }
+                }
             } catch (err) {
                 console.error(err);
             }
