@@ -113,6 +113,9 @@ function draw() {
     // Github link
     githubLinkImg.position(x - githubLinkImg.width - PADDING, y + PADDING);
 
+    // Filter bg
+    let filterWidth = windowWidth * .667 - 2 * PADDING;
+
     // Filter buttons
     for (let i = 0; i < labs.length; i++) {
         labs[i].button.size(0.98 * filterWidth / labs.length, TITLE_HEIGHT - 1);
